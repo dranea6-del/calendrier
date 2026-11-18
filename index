@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le calendrier de l'Avent de la Forge — DRANE Hauts-de-France</title>
+<style>
+:root{
+  --nuit:#0f1d3a; --nuit2:#18294f; --or:#e8b94a; --or2:#f6d98b; --rouge:#c8102e;
+  --creme:#fff8ec; --texte:#1d2433; --vert:#1f6f54;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  background:radial-gradient(ellipse at top,var(--nuit2),var(--nuit) 70%);
+  color:var(--creme); min-height:100vh; overflow-x:hidden;
+}
+/* Neige */
+.neige{position:fixed;inset:0;pointer-events:none;z-index:0}
+.flocon{position:absolute;top:-10px;color:#fff;opacity:.7;animation:tomber linear infinite}
+@keyframes tomber{to{transform:translateY(105vh) translateX(30px)}}
+@media (prefers-reduced-motion:reduce){.flocon{display:none}}
+
+header{position:relative;z-index:1;text-align:center;padding:2.2rem 1rem 1rem}
+header .sur{letter-spacing:.2em;text-transform:uppercase;font-size:.8rem;color:var(--or2)}
+header h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.8rem,4.5vw,3rem);margin:.4rem 0;color:#fff}
+header h1 span{color:var(--or)}
+header p{max-width:720px;margin:.6rem auto 0;line-height:1.5;opacity:.9}
+.legende{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;font-size:.85rem;opacity:.85}
+.legende b{color:var(--or2)}
+.compteur{margin-top:.8rem;font-size:.95rem;color:var(--or2)}
+
+main{position:relative;z-index:1;max-width:1150px;margin:0 auto;padding:1rem 1rem 3rem}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}
+.case{
+  position:relative;aspect-ratio:1/1.05;border-radius:14px;overflow:hidden;
+  background:var(--creme);color:var(--texte);box-shadow:0 6px 18px rgba(0,0,0,.35);
+  user-select:none;-webkit-user-select:none;
+}
+.case:nth-child(4n+2){grid-row:span 1}
+.face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:.8rem;text-align:center;gap:.35rem}
+.face .num{font-family:Georgia,serif;font-size:1rem;color:var(--rouge);font-weight:700}
+.face .ico{font-size:2.2rem;line-height:1}
+.face .nom{font-weight:700;font-size:1.05rem}
+.face .theme{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--vert)}
+.face button{margin-top:.3rem;border:0;background:var(--nuit);color:#fff;border-radius:999px;padding:.4rem .9rem;
+  font-size:.82rem;cursor:pointer}
+.face button:hover,.face button:focus-visible{background:var(--rouge);outline:3px solid var(--or);outline-offset:2px}
+canvas.grattage{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+.verrou{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#2a3c66,#1a2848);color:#cfd8ee;text-align:center;padding:.8rem;gap:.3rem;
+  border:2px dashed rgba(232,185,74,.35);border-radius:14px}
+.verrou .grand{font-family:Georgia,serif;font-size:2.6rem;color:var(--or)}
+.verrou small{font-size:.78rem;opacity:.85}
+.aide-clavier{position:absolute;bottom:6px;left:0;right:0;text-align:center;z-index:2}
+.aide-clavier button{font-size:.7rem;background:rgba(15,29,58,.75);color:#fff;border:0;border-radius:999px;padding:.2rem .6rem;cursor:pointer}
+.aide-clavier button:focus-visible{outline:3px solid var(--or)}
+
+/* Fenêtre */
+.voile{position:fixed;inset:0;background:rgba(6,12,28,.75);display:none;align-items:center;justify-content:center;z-index:10;padding:1rem}
+.voile.ouvert{display:flex}
+.fenetre{background:var(--creme);color:var(--texte);border-radius:18px;max-width:640px;width:100%;max-height:92vh;overflow:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);position:relative}
+.fenetre .tete{background:var(--nuit);color:#fff;padding:1.3rem 1.5rem 1.1rem;border-bottom:4px solid var(--or)}
+.fenetre .tete .jour{color:var(--or2);font-size:.85rem;letter-spacing:.12em;text-transform:uppercase}
+.fenetre .tete h2{font-family:Georgia,serif;font-size:1.7rem;margin-top:.2rem}
+.fenetre .corps{padding:1.2rem 1.5rem 1.5rem;line-height:1.55}
+.fenetre .desc{font-size:1.05rem;margin-bottom:1rem}
+.bloc{border-radius:12px;padding:.8rem 1rem;margin:.6rem 0}
+.bloc h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.25rem}
+.b1d{background:#e7f3ee}.b1d h3{color:var(--vert)}
+.b2d{background:#e9eefb}.b2d h3{color:#2b4a9b}
+.defi{background:#fdeccf;border:2px dashed var(--or)}.defi h3{color:#9a5b00}
+.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
+.btn{display:inline-block;text-decoration:none;border:0;border-radius:999px;padding:.65rem 1.2rem;font-weight:600;cursor:pointer;font-size:.95rem}
+.btn-or{background:var(--rouge);color:#fff}.btn-or:hover{background:#a00d25}
+.btn-sec{background:#e3e6ee;color:var(--texte)}
+.btn:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.fermer{position:absolute;top:.7rem;right:.8rem;background:transparent;border:0;color:#fff;font-size:1.6rem;cursor:pointer;line-height:1}
+.fermer:focus-visible{outline:3px solid var(--or)}
+
+footer{position:relative;z-index:1;text-align:center;font-size:.8rem;opacity:.75;padding:0 1rem 2rem;line-height:1.6}
+footer a{color:var(--or2)}
+.bandeau-demo{position:fixed;bottom:0;left:0;right:0;background:var(--rouge);color:#fff;text-align:center;padding:.4rem;font-size:.85rem;z-index:5}
+/* Smartphones et petites tablettes */
+@media (max-width:600px){
+  header{padding:1.4rem .8rem .6rem}
+  header p{font-size:.92rem}
+  .legende{gap:.5rem;font-size:.78rem}
+  main{padding:.6rem .6rem 3rem}
+  .grille{grid-template-columns:repeat(3,1fr);gap:8px}
+  .case{border-radius:10px}
+  .face{padding:.4rem;gap:.15rem}
+  .face .num{font-size:.72rem}
+  .face .ico{font-size:1.5rem}
+  .face .nom{font-size:.78rem;line-height:1.15}
+  .face .theme{display:none}
+  .face button{font-size:.68rem;padding:.25rem .55rem}
+  .verrou .grand{font-size:1.8rem}
+  .verrou small{font-size:.66rem}
+  .aide-clavier button{font-size:.62rem;padding:.15rem .45rem}
+  .fenetre .tete{padding:1rem 1.1rem .9rem}
+  .fenetre .tete h2{font-size:1.35rem}
+  .fenetre .corps{padding:1rem 1.1rem 1.2rem}
+  .fenetre .desc{font-size:.98rem}
+  .actions .btn{flex:1;text-align:center}
+}
+@media (max-width:340px){ .grille{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+<div class="neige" id="neige" aria-hidden="true"></div>
+
+<header>
+  <div class="sur">DRANE Hauts-de-France · Académies de Lille et d'Amiens</div>
+  <h1>Le calendrier de l'Avent <span>de la Forge</span></h1>
+  <p>Chaque jour de décembre, grattez une case et découvrez un outil libre de la Forge des communs numériques éducatifs : utilisable en ligne, gratuit, souvent sans compte… et utile de la maternelle au lycée.</p>
+  <div class="legende">
+    <span>🖱️ <b>Grattez</b> la case du jour (souris ou doigt)</span>
+    <span>⌨️ ou bouton <b>« Ouvrir »</b> au clavier</span>
+    <span>🔒 Les cases s'ouvrent <b>jour après jour</b></span>
+  </div>
+  <div class="compteur" id="compteur"></div>
+</header>
+
+<main>
+  <div class="grille" id="grille"></div>
+</main>
+
+<div class="voile" id="voile" role="dialog" aria-modal="true" aria-labelledby="f-titre">
+  <div class="fenetre">
+    <button class="fermer" id="fermer" aria-label="Fermer">×</button>
+    <div class="tete">
+      <div class="jour" id="f-jour"></div>
+      <h2 id="f-titre"></h2>
+    </div>
+    <div class="corps">
+      <p class="desc" id="f-desc"></p>
+      <div class="bloc b1d"><h3>🧒 À l'école (1er degré)</h3><p id="f-1d"></p></div>
+      <div class="bloc b2d"><h3>🎓 Au collège et au lycée (2nd degré)</h3><p id="f-2d"></p></div>
+      <div class="bloc defi"><h3>⏱️ Le défi du jour : 5 minutes chrono</h3><p id="f-defi"></p></div>
+      <div class="actions">
+        <a class="btn btn-or" id="f-lien" href="#" target="_blank" rel="noopener">Ouvrir l'outil ↗</a>
+        <button class="btn btn-sec" id="f-ok">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Sélection issue de la <a href="https://ressourcerie.forge.apps.education.fr" target="_blank" rel="noopener">Ressourcerie de la Forge des communs numériques éducatifs</a>.
+  Outils libres conçus par des enseignants pour des enseignants.<br>
+  Avant tout usage avec les élèves, vérifiez les conditions d'utilisation de chaque outil et le cadre d'usage de l'IA en éducation.
+</footer>
+
+<script>
+const OUTILS = [
+ {n:1, nom:"La roue tourne", ico:"🎡", theme:"Animer la classe",
+  url:"https://larouetourne.forge.apps.education.fr/",
+  desc:"Une roue aléatoire personnalisable pour tirer au sort un élève, une équipe ou un sujet en un clic.",
+  d1:"Désigner les responsables de la semaine ou le mot à épeler en rituel du matin, roue projetée au tableau.",
+  d2:"Tirer au sort l'ordre de passage à l'oral ou le sujet d'exposé, en toute transparence devant la classe.",
+  defi:"Créez une roue avec les prénoms d'une de vos classes et faites-la tourner une première fois."},
+ {n:2, nom:"Tuxtimer", ico:"⏳", theme:"Gérer le temps",
+  url:"https://educajou.forge.apps.education.fr/tuxtimer",
+  desc:"Un minuteur visuel de 0 à 60 minutes, personnalisable, à projeter sur l'écran de la classe.",
+  d1:"Rendre visible le temps d'un atelier ou du rangement : les élèves voient le temps qui reste.",
+  d2:"Cadencer un travail en îlots ou une évaluation : chacun gère son temps sans demander « il reste combien ? ».",
+  defi:"Préparez un minuteur pour la prochaine activité de votre emploi du temps."},
+ {n:3, nom:"Live Quiz", ico:"⚡", theme:"Quiz & IA",
+  url:"https://live-quiz.forge.apps.education.fr/",
+  desc:"Des quiz interactifs à la manière de Kahoot, générés avec l'aide de l'IA : les élèves répondent tous en même temps.",
+  d1:"Un quiz de fin de séance projeté, auquel la classe répond par équipes.",
+  d2:"Réactiver les notions de la séance précédente en 5 minutes en début d'heure.",
+  defi:"Générez un quiz de 5 questions sur la notion que vous traitez demain, puis relisez et corrigez les propositions de l'IA."},
+ {n:4, nom:"Scribéo", ico:"🎙️", theme:"Oral & écrit",
+  url:"https://scribeo.forge.apps.education.fr/",
+  desc:"La transcription de la voix en texte directement dans le navigateur, sans envoi de données vers un serveur externe.",
+  d1:"Une dictée à l'adulte numérique : l'élève qui a du mal à écrire dicte son histoire, puis la relit.",
+  d2:"Passer d'un brouillon oral à un premier jet écrit, ou garder trace d'un débat en classe.",
+  defi:"Dictez le compte rendu de votre dernière réunion et regardez ce que donne la transcription."},
+ {n:5, nom:"Mymarkmap", ico:"🧠", theme:"Organiser ses idées",
+  url:"https://mymarkmap.forge.apps.education.fr",
+  desc:"Une carte mentale générée à partir d'un simple texte structuré (Markdown), à partager et télécharger.",
+  d1:"Construire collectivement la carte de la leçon de sciences, puis l'afficher en classe.",
+  d2:"Proposer le plan d'un chapitre sous forme de carte pour les révisions.",
+  defi:"Tapez le plan de votre prochaine séquence en Markdown (# titre, ## parties) et transformez-le en carte."},
+ {n:6, nom:"CartesMémoire", ico:"🃏", theme:"Mémoriser",
+  url:"https://cartesmemoire.forge.apps.education.fr",
+  desc:"Des flashcards faciles à créer et à partager, avec répétition espacée pour mémoriser durablement.",
+  d1:"S'entraîner sur les mots invariables ou les tables de multiplication, quelques minutes par jour.",
+  d2:"Réviser vocabulaire de langue vivante, dates, définitions ou formules avant une évaluation.",
+  defi:"Créez 10 cartes sur une notion de votre discipline et testez-vous."},
+ {n:7, nom:"Face Privacy", ico:"🙈", theme:"Protéger les données",
+  url:"https://faceprivacy.forge.apps.education.fr/app",
+  desc:"Le floutage des visages d'une photo directement dans le navigateur : les images restent sur votre ordinateur.",
+  d1:"Publier les photos d'une sortie scolaire sur le blog de l'école en respectant le droit à l'image.",
+  d2:"Illustrer un compte rendu de projet sur l'ENT sans exposer les élèves.",
+  defi:"Floutez les visages d'une photo de groupe et comparez avant/après."},
+ {n:8, nom:"QRapide", ico:"🔳", theme:"Partager vite",
+  url:"https://qrapide.forge.apps.education.fr",
+  desc:"Des codes QR générés et personnalisés en quelques secondes (styles, couleurs, export JPG).",
+  d1:"Coller des QR codes sur les affichages pour écouter une lecture enregistrée ou une consigne audio.",
+  d2:"Donner l'accès à une ressource en ligne depuis le tableau ou une fiche papier, sans recopier de lien.",
+  defi:"Générez le QR code d'une ressource que vous utilisez souvent et collez-le dans votre prochaine fiche."},
+ {n:9, nom:"Pdf2Flip", ico:"📖", theme:"Publier",
+  url:"https://pdf2flip.forge.apps.education.fr",
+  desc:"La transformation d'un PDF en livre numérique à feuilleter et partager en ligne, comme Calaméo.",
+  d1:"Transformer l'album écrit par la classe en livre à feuilleter, à partager avec les familles.",
+  d2:"Publier un carnet de voyage, une revue de CDI ou un dossier de projet en version feuilletable.",
+  defi:"Transformez un de vos PDF en flipbook et feuilletez-le."},
+ {n:10, nom:"PDF Studio", ico:"🧰", theme:"Gagner du temps",
+  url:"https://vibe-edu.forge.apps.education.fr/pdf-studio/",
+  desc:"La boîte à outils PDF dans le navigateur : alléger, fusionner, signer, extraire des pages.",
+  d1:"Fusionner en un seul fichier les documents de la sortie (autorisations, programme, liste).",
+  d2:"Alléger un sujet trop lourd pour l'ENT ou extraire seulement les pages utiles d'un manuel numérique.",
+  defi:"Prenez le PDF le plus lourd de votre bureau et allégez-le."},
+ {n:11, nom:"Inclus'IA", ico:"🤝", theme:"Inclusion & IA",
+  url:"https://inclusia.forge.apps.education.fr/",
+  desc:"Un générateur de prompts pour intégrer l'inclusion à votre pédagogie : FALC, CUA, élèves allophones, différenciation.",
+  d1:"Préparer une consigne en FALC pour un élève à besoins éducatifs particuliers.",
+  d2:"Adapter un document pour un élève allophone ou proposer plusieurs niveaux d'étayage.",
+  defi:"Générez un prompt pour adapter votre prochaine consigne, testez-le dans un outil d'IA autorisé et relisez le résultat d'un œil critique."},
+ {n:12, nom:"Éduc'IA", ico:"🤖", theme:"Éduquer à l'IA",
+  url:"https://educia.forge.apps.education.fr/",
+  desc:"Un outil pour concevoir des activités qui apprennent aux élèves à comprendre, évaluer et utiliser l'IA de façon éclairée.",
+  d1:"Au cycle 3, un temps d'échange : une machine peut-elle se tromper ? Comment le vérifier ?",
+  d2:"En EMI ou dans toute discipline, faire évaluer par les élèves une réponse produite par une IA.",
+  defi:"Concevez une activité de 20 minutes d'éducation à l'IA pour l'une de vos classes."},
+ {n:13, nom:"ChatMD", ico:"💬", theme:"Créer un chatbot",
+  url:"https://chatmd.forge.apps.education.fr",
+  desc:"Un chatbot créé à partir d'un simple fichier texte (Markdown), avec possibilité d'intégrer l'IA de façon maîtrisée.",
+  d1:"Un assistant qui guide les élèves pas à pas dans un atelier autonome.",
+  d2:"Un chatbot « méthodologie » ou « foire aux questions » pour un projet, l'orientation ou un oral.",
+  defi:"Ouvrez un des exemples proposés, puis modifiez une réponse pour l'adapter à votre classe."},
+ {n:14, nom:"Markpage", ico:"🌐", theme:"Créer un site",
+  url:"https://markpage.forge.apps.education.fr",
+  desc:"Un minisite web créé à partir d'un fichier Markdown hébergé sur CodiMD (accessible via Apps Education).",
+  d1:"Le site d'un projet de classe (classe découverte, élevage, défi lecture) à partager aux familles.",
+  d2:"Un minisite de séquence regroupant consignes, ressources et liens pour les élèves.",
+  defi:"Créez un pad CodiMD sur Apps Education avec 3 rubriques et affichez-le dans Markpage."},
+ {n:15, nom:"Lightpad", ico:"📌", theme:"Mutualiser",
+  url:"https://lightpad.forge.apps.education.fr",
+  desc:"Un mur en colonnes, un peu comme Padlet, créé à partir d'un fichier Markdown pour organiser et partager des ressources.",
+  d1:"Un mur de ressources pour les familles : chants, comptines, liens utiles pour les vacances.",
+  d2:"Un mur par chapitre avec vidéos, exercices et corrigés, à partager sur l'ENT.",
+  defi:"Créez un mur à 3 colonnes : « À voir », « À faire », « Pour aller plus loin »."},
+ {n:16, nom:"QCMCam", ico:"📷", theme:"Sonder sans écran élève",
+  url:"https://q2.qcmcam.net/",
+  desc:"Des sondages QCM à l'aide d'une webcam et de marqueurs montrés par les élèves (alternative libre à Plickers).",
+  d1:"Vérifier en un clin d'œil la compréhension de toute la classe, sans tablettes.",
+  d2:"Une évaluation diagnostique flash en début de séquence, résultats immédiats.",
+  defi:"Imprimez la planche de marqueurs et préparez 3 questions pour votre prochain cours."},
+ {n:17, nom:"Ultimate Gutenberg", ico:"📰", theme:"Écrire & publier",
+  url:"https://professeurherve.forge.apps.education.fr/ultimategutenberg",
+  desc:"La mise en page d'un journal de classe directement dans le navigateur, avec export PDF.",
+  d1:"Le journal de l'école avant les vacances : articles, dessins et interviews des élèves.",
+  d2:"Un journal de collège ou de lycée en EMI, pour la Semaine de la presse ou un club journal.",
+  defi:"Mettez en page une « une » de journal avec un titre et deux articles fictifs."},
+ {n:18, nom:"Easy StopMotion", ico:"🎬", theme:"Créer en vidéo",
+  url:"https://easystopmotion.forge.apps.education.fr",
+  desc:"De petits films en stop motion réalisés dans le navigateur, grâce à une interface simple.",
+  d1:"Animer le cycle de vie d'une plante ou une histoire en pâte à modeler.",
+  d2:"Modéliser un phénomène (mouvement des planètes, réaction) ou jouer une saynète en langue vivante.",
+  defi:"Réalisez une animation de 10 images avec un objet de votre bureau."},
+ {n:19, nom:"RadioPad", ico:"📻", theme:"Faire de la webradio",
+  url:"https://troadec.forge.apps.education.fr/radiopad/",
+  desc:"Une console de webradio dans le navigateur : des pads colorés pour déclencher en direct sons, jingles, ambiances et effets.",
+  d1:"Animer l'émission de radio de la classe : les élèves lancent le jingle, les applaudissements et la météo de l'école.",
+  d2:"Monter une émission en direct (club radio, EMI, langues vivantes) avec une régie tenue par les élèves.",
+  defi:"Préparez une grille de 4 pads (jingle d'ouverture, transition, applaudissements, jingle de fin) et testez votre « direct »."},
+ {n:20, nom:"Spotlight", ico:"🔦", theme:"Capter l'attention",
+  url:"https://educajou.forge.apps.education.fr/spotlight",
+  desc:"Un projecteur qui focalise l'attention sur une zone d'image grâce à un cercle transparent sur un voile.",
+  d1:"Observer une œuvre d'art détail par détail et faire émettre des hypothèses avant de tout dévoiler.",
+  d2:"Analyser un document historique, une carte ou un schéma de SVT en guidant le regard.",
+  defi:"Chargez une image de votre prochain cours et préparez trois zones à dévoiler."},
+ {n:21, nom:"Recherche images", ico:"🖼️", theme:"Trouver des images libres",
+  url:"https://classeadeux.forge.apps.education.fr/rechercheimages/",
+  desc:"La recherche d'images sans publicités ni traqueurs dans des banques libres (ARASAAC, Pixabay, Pexels, Openverse…).",
+  d1:"Trouver des pictogrammes ARASAAC pour un emploi du temps visuel ou un imagier.",
+  d2:"Illustrer un exposé avec des images libres de droits, en apprenant à citer ses sources.",
+  defi:"Trouvez trois images libres pour illustrer votre prochain support de cours."},
+ {n:22, nom:"Mèmes libres", ico:"😄", theme:"Détourner pour apprendre",
+  url:"https://memes.forge.apps.education.fr/",
+  desc:"Des mèmes créés à partir d'images libres, dans le navigateur, sans filigrane.",
+  d1:"Au cycle 3, résumer avec humour une règle de grammaire ou de sécurité.",
+  d2:"En EMI, comprendre le détournement d'images et les codes des réseaux sociaux en créant ses propres mèmes.",
+  defi:"Créez un mème qui résume une erreur fréquente de vos élèves."},
+ {n:23, nom:"Raccord-Minute", ico:"✂️", theme:"Monter une vidéo",
+  url:"https://raccord-minute.forge.apps.education.fr/",
+  desc:"Le montage vidéo dans le navigateur, sans installation et sans envoyer vos fichiers sur un serveur.",
+  d1:"Assembler les séquences filmées du spectacle ou d'un projet, en respectant le droit à l'image.",
+  d2:"Monter un reportage, un tutoriel élève ou une bande-annonce de lecture.",
+  defi:"Assemblez deux courtes vidéos et ajoutez un titre."},
+ {n:24, nom:"Pablocut", ico:"✨", theme:"La magie du détourage",
+  url:"https://pablocut.forge.apps.education.fr/",
+  desc:"Le fond d'une photo supprimé en un clic, directement dans le navigateur : l'IA travaille sur votre ordinateur et la photo n'est envoyée nulle part. Vous obtenez une image PNG sur fond transparent.",
+  d1:"Détourer les dessins ou les objets fabriqués par les élèves pour en faire un imagier, une affiche ou les personnages d'une histoire.",
+  d2:"Détourer un objet scientifique, une œuvre ou un document pour un exposé, une infographie ou un montage en EMI, en parlant au passage de l'IA qui tourne en local.",
+  defi:"Dernière case ! Détourez une photo de vous ou de votre bureau, posez-la sur un fond de Noël et envoyez votre carte de vœux à l'équipe. Joyeuses fêtes 🎁"}
+];
+
+/* Disposition mélangée mais stable (comme un vrai calendrier) */
+const ORDRE = [14,3,22,9,1,18,7,24,11,5,20,16,2,13,8,21,6,19,4,15,10,23,12,17];
+
+const params = new URLSearchParams(location.search);
+const DEMO = true;
+const CLE = "avent-forge-drane-grattees";
+
+function lireGrattees(){ try{ return JSON.parse(localStorage.getItem(CLE)||"[]"); }catch(e){ return []; } }
+function sauverGrattees(l){ try{ localStorage.setItem(CLE, JSON.stringify(l)); }catch(e){} }
+let grattees = lireGrattees();
+
+function estOuverte(n){
+  if (DEMO) return true;
+  const now = new Date();
+  const m = now.getMonth(), j = now.getDate();
+  if (m === 11) return j >= n;        // décembre
+  if (m === 0) return true;           // janvier : tout reste ouvert
+  return false;
+}
+
+function joursAvant(n){
+  const now = new Date();
+  let y = now.getFullYear();
+  const cible = new Date(y, 11, n);
+  return Math.ceil((cible - new Date(y, now.getMonth(), now.getDate())) / 86400000);
+}
+
+const grille = document.getElementById("grille");
+
+function creerCase(n){
+  const o = OUTILS.find(x=>x.n===n);
+  const el = document.createElement("div");
+  el.className = "case";
+  el.dataset.n = n;
+  if (!estOuverte(n)){
+    const d = joursAvant(n);
+    el.innerHTML = `<div class="verrou" aria-label="Case ${n}, verrouillée">
+      <div class="grand">${n}</div><div>🔒</div>
+      <small>${d>0 ? (d===1?"Demain !":"Encore "+d+" jours") : "Patience…"}</small></div>`;
+    return el;
+  }
+  el.innerHTML = `<div class="face">
+      <div class="num">${n} décembre</div>
+      <div class="ico" aria-hidden="true">${o.ico}</div>
+      <div class="nom">${o.nom}</div>
+      <div class="theme">${o.theme}</div>
+      <button type="button" data-ouvrir="${n}">Découvrir</button>
+    </div>`;
+  if (!grattees.includes(n)){
+    const c = document.createElement("canvas");
+    c.className = "grattage";
+    c.setAttribute("aria-hidden","true");
+    el.appendChild(c);
+    const aide = document.createElement("div");
+    aide.className = "aide-clavier";
+    aide.innerHTML = `<button type="button" aria-label="Ouvrir la case du ${n} décembre sans gratter">Ouvrir</button>`;
+    el.appendChild(aide);
+    aide.querySelector("button").addEventListener("click", ()=>reveler(el, n, true));
+    requestAnimationFrame(()=>initGrattage(c, el, n));
+  }
+  return el;
+}
+
+function initGrattage(c, el, n){
+  const r = el.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  c.width = r.width * dpr; c.height = r.height * dpr;
+  const ctx = c.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const g = ctx.createLinearGradient(0,0,r.width,r.height);
+  g.addColorStop(0,"#f6d98b"); g.addColorStop(.5,"#e8b94a"); g.addColorStop(1,"#c9942a");
+  ctx.fillStyle = g; ctx.fillRect(0,0,r.width,r.height);
+  // paillettes
+  for(let i=0;i<70;i++){
+    ctx.fillStyle = `rgba(255,255,255,${Math.random()*.5})`;
+    ctx.fillRect(Math.random()*r.width, Math.random()*r.height, 2, 2);
+  }
+  ctx.fillStyle = "#7a1020";
+  ctx.textAlign = "center";
+  const t = Math.max(.55, Math.min(1, r.width/170));
+  ctx.font = `bold ${Math.round(46*t)}px Georgia, serif`;
+  ctx.fillText(n, r.width/2, r.height/2 + 6*t);
+  ctx.font = `600 ${Math.round(13*t)}px system-ui, sans-serif`;
+  ctx.fillText(r.width < 130 ? "Grattez !" : "✨ Grattez-moi ✨", r.width/2, r.height/2 + 34*t);
+  ctx.globalCompositeOperation = "destination-out";
+
+  let actif = false, fini = false, compteur = 0;
+  const pos = e => { const b = c.getBoundingClientRect(); return [e.clientX-b.left, e.clientY-b.top]; };
+  const gratter = e => {
+    if(!actif || fini) return;
+    const [x,y] = pos(e);
+    ctx.beginPath(); ctx.arc(x,y,Math.max(14, r.width/8),0,Math.PI*2); ctx.fill();
+    if (++compteur % 8 === 0 && pourcentage() > 0.5){ fini = true; reveler(el, n, true); }
+  };
+  const pourcentage = () => {
+    const d = ctx.getImageData(0,0,c.width,c.height).data;
+    let vide = 0, total = 0;
+    for(let i=3;i<d.length;i+=64){ total++; if(d[i]===0) vide++; }
+    return vide/total;
+  };
+  c.addEventListener("pointerdown", e=>{ actif=true; c.setPointerCapture(e.pointerId); gratter(e); });
+  c.addEventListener("pointermove", gratter);
+  ["pointerup","pointercancel","pointerleave"].forEach(t=>c.addEventListener(t,()=>actif=false));
+}
+
+function reveler(el, n, ouvrir){
+  const c = el.querySelector("canvas"); const a = el.querySelector(".aide-clavier");
+  if (c){ c.style.transition="opacity .5s"; c.style.opacity="0"; setTimeout(()=>c.remove(),500); }
+  if (a) a.remove();
+  if (!grattees.includes(n)){ grattees.push(n); sauverGrattees(grattees); majCompteur(); }
+  if (ouvrir) setTimeout(()=>ouvrirFenetre(n), 450);
+}
+
+const voile = document.getElementById("voile");
+let dernierFocus = null;
+function ouvrirFenetre(n){
+  const o = OUTILS.find(x=>x.n===n);
+  dernierFocus = document.activeElement;
+  document.getElementById("f-jour").textContent = `Case du ${n} décembre · ${o.theme}`;
+  document.getElementById("f-titre").textContent = `${o.ico} ${o.nom}`;
+  document.getElementById("f-desc").textContent = o.desc;
+  document.getElementById("f-1d").textContent = o.d1;
+  document.getElementById("f-2d").textContent = o.d2;
+  document.getElementById("f-defi").textContent = o.defi;
+  document.getElementById("f-lien").href = o.url;
+  voile.classList.add("ouvert");
+  document.getElementById("f-lien").focus();
+}
+function fermerFenetre(){ voile.classList.remove("ouvert"); if(dernierFocus) dernierFocus.focus(); }
+document.getElementById("fermer").addEventListener("click", fermerFenetre);
+document.getElementById("f-ok").addEventListener("click", fermerFenetre);
+voile.addEventListener("click", e=>{ if(e.target===voile) fermerFenetre(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && voile.classList.contains("ouvert")) fermerFenetre(); });
+grille.addEventListener("click", e=>{
+  const b = e.target.closest("[data-ouvrir]");
+  if (b) ouvrirFenetre(+b.dataset.ouvrir);
+});
+
+function majCompteur(){
+  const ouvertes = OUTILS.filter(o=>estOuverte(o.n)).length;
+  const txt = ouvertes === 0
+    ? `🎁 Première case le 1er décembre — encore ${joursAvant(1)} jour${joursAvant(1)>1?"s":""} de patience !`
+    : `🎁 ${grattees.filter(n=>estOuverte(n)).length} case(s) grattée(s) sur ${ouvertes} disponible(s)`;
+  document.getElementById("compteur").textContent = txt;
+}
+
+function construire(){ grille.innerHTML=""; ORDRE.forEach(n=>grille.appendChild(creerCase(n))); }
+construire();
+let largeur = window.innerWidth, minuterie;
+window.addEventListener("resize", ()=>{
+  if (Math.abs(window.innerWidth - largeur) < 40) return;   // ignore la barre d'adresse mobile
+  largeur = window.innerWidth;
+  clearTimeout(minuterie); minuterie = setTimeout(construire, 250);
+});
+majCompteur();
+
+if (DEMO){
+  const b = document.createElement("div");
+  b.className = "bandeau-demo";
+  b.textContent = "Mode démonstration : toutes les cases sont ouvertes (retirez ?demo de l'adresse pour le mode normal).";
+  document.body.appendChild(b);
+}
+
+/* Neige */
+const neige = document.getElementById("neige");
+for(let i=0;i<40;i++){
+  const f = document.createElement("div");
+  f.className = "flocon"; f.textContent = "❄";
+  f.style.left = Math.random()*100 + "vw";
+  f.style.fontSize = (8 + Math.random()*14) + "px";
+  f.style.animationDuration = (8 + Math.random()*12) + "s";
+  f.style.animationDelay = (-Math.random()*20) + "s";
+  neige.appendChild(f);
+}
+</script>
+</body>
+</html>
